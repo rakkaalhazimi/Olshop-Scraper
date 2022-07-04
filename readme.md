@@ -13,5 +13,5 @@ pip install -r requirements.txt
 ## First Try:
 Run
 ```
-python app/driver.py
+python main.py
 ```
