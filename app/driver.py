@@ -3,7 +3,7 @@ from selenium.webdriver import chrome
 from selenium import webdriver
 
 
-def get_options(
+def create_options(
         headless: bool = True,
         resolution: Tuple[int, int] = (1920, 1080),
     ):
@@ -27,7 +27,7 @@ def get_options(
     return options
 
 
-def get_driver(
+def create_driver(
         path: str = "chromedriver.exe",
         options: chrome.options.Options = None
     ):
@@ -37,8 +37,8 @@ def get_driver(
 
 
 if __name__ == "__main__":
-    options = get_options(headless=False, resolution=(1366, 768))
-    driver = get_driver(options=options)
+    options = create_options(headless=False, resolution=(1366, 768))
+    driver = create_driver(options=options)
     driver.get("https://google.com")
     driver.save_screenshot("google.png")
     driver.quit()
