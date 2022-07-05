@@ -13,6 +13,8 @@ def create_options(
 
     if headless:
         options.add_argument("--headless")
+        user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36"
+        options.add_argument(f"user-agent={user_agent}")
     options.add_argument(f"--window-size={width},{height}")
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--allow-running-insecure-content')
