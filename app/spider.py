@@ -18,11 +18,11 @@ class Spider:
 
 class Tokopedia(Spider):
     
-    def __init__(self, url):
-        super().__init__()
+    def __init__(self, url: str, **kwargs):
+        super().__init__(**kwargs)
         self.url = self.driver.get(url)
 
-    def search(self, keyword):
+    def search(self, keyword: str):
         try: 
             # Wait then find search bar
             search_bar = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".e110g5pc0")))
