@@ -129,25 +129,34 @@ class Shopee(Spider):
             search_button = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".shopee-searchbar__search-button")))
             search_button.click()
 
-        except TimeoutException:
+        except (TimeoutException, NoSuchElementException) as e:
             print("time out. Koneksi Internetmu mungkin lambat. Error: searchbar/search button")
             self.driver.quit()
 
     def snapshot(self):
-        return self.driver.save_screenshot("tokopedia.png")
+        return self.driver.save_screenshot("shopee.png")
     
     def quit(self):
         return self.driver.quit()
 
 
 if __name__ == "__main__":
-    tokopedia = Tokopedia(
-        url="https://www.tokopedia.com/p/handphone-tablet/handphone", 
+    # tokopedia = Tokopedia(
+    #     url="https://www.tokopedia.com/p/handphone-tablet/handphone", 
+    #     headless=False,
+    # )
+    # tokopedia.search("iphone 13")
+    # tokopedia.scroll_until_bottom()
+    # tokopedia.snapshot()
+    # tokopedia.quit()
+
+    shopee = Shopee(
+        url="https://shopee.co.id/", 
         headless=False,
     )
-    tokopedia.search("iphone 13")
-    tokopedia.scroll_until_bottom()
-    tokopedia.snapshot()
-    tokopedia.quit()
+    shopee.search("iphone 13")
+    shopee.scroll_until_bottom()
+    shopee.snapshot()
+    shopee.quit()
 
 
