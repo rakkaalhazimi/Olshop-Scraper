@@ -16,7 +16,11 @@ class Spider:
         self.driver = create_driver("chromedriver.exe", options=self.head)
         self.wait = WebDriverWait(self.driver, 5)
 
-    def scroll_until_bottom(self):
+    def scroll_infinitely(self):
+        """_summary_
+
+        ref: https://stackoverflow.com/questions/20986631/how-can-i-scroll-a-web-page-using-selenium-webdriver-in-python
+        """
         SCROLL_PAUSE_TIME = 0.5
 
         while True:
@@ -36,6 +40,43 @@ class Spider:
                 break
 
             last_height = new_height
+
+
+    def scroll_until_bottom(self):
+        """_summary_
+        ref: https://stackoverflow.com/questions/20986631/how-can-i-scroll-a-web-page-using-selenium-webdriver-in-python
+        """
+        SCROLL_PAUSE_TIME = 0.5
+        SCROLL_TRIES = 2
+
+        # Select html tag
+        html = self.driver.find_element(By.TAG_NAME, "html")
+
+        new_diff = -1
+        
+
+        while SCROLL_TRIES > 1:
+            # Wait to load page
+            time.sleep(SCROLL_PAUSE_TIME)
+
+            # Press page down on browser
+            html.send_keys(Keys.PAGE_DOWN)
+
+            # Get current height after scroll
+            last_height = self.driver.execute_script("return window.pageYOffset")
+
+            # Calculate new scroll height and compare with last scroll height
+            new_height = self.driver.execute_script("return document.body.scrollHeight")
+
+            last_diff = new_height - last_height
+
+            print(new_diff, last_diff)
+            if new_diff == last_diff:
+                SCROLL_TRIES -= 1
+
+            new_diff = last_diff
+
+    
 
     def click_next_page(self):
         ...
