@@ -1,55 +1,57 @@
-from typing import Mapping, Tuple, Any
-
-from requests import PreparedRequest
-from selenium import webdriver
+from driver import get_driver
+from driver import get_options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+
+
+class Olshop:
+
+    def __init__(self):
+        self.head = get_options(headless=True) # kalau false baru bisa
+        self.driver = get_driver("chromedriver.exe", options=self.head)
+        self.wait = WebDriverWait(self.driver, 5)
+
+
+class Tokopedia(Olshop):
+    
+    def __init__(self, url):
+        super().__init__()
+        self.url = self.driver.get(url)
+
+    def search(self, keyword):
+    # Wait then find search bar
+        try: 
+            search_bar = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".e110g5pc0")))
+            search_bar.clear() # search bar ga mau diclear
+            search_bar.send_keys(keyword)
+
+    #find submit button
+            search_button = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".css-1czin5k")))
+            search_button.click()
+        except:
+            print("time out. Koneksi Internetmu mungkin lambat. Error: searchbar/search button")
+            self.driver.quit()
+
+    def snapshot(self):
+        return self.driver.save_screenshot("tokopedia.png")
+    
+    def quit(self):
+        return self.driver.quit()
+
+
+class Shopee(Olshop):
+    pass
+
+
+tokopedia = Tokopedia(url = "https://tokopedia.com")
+
+tokopedia
+tokopedia.search("iphone 13")
+tokopedia.snapshot()
+tokopedia.quit()
 
 
 
-class MultiPageSpider:
-    """Crawl and scrap element from multiple pages in website."""
 
-    def __init__(self,
-                 driver: webdriver.Chrome,
-                 address: str,
-                 pages: int,
-                 ):
-        """
-        _summary_
-
-        Args:
-            driver (webdriver.Chrome): chrome webdriver (preferebly)
-            address (str): target address
-            pages (int): number of pages
-        """
-        self.driver = driver
-        self.address = address
-        self.pages = pages
-
-    def __len__(self):
-        return self.pages
-
-    def __iter__(self):
-        return (self.__getitem__(i) for i in range(self.pages))
-
-    def __getitem__(self, pos) -> Mapping[str, Any]:
-        page = pos + 1
-
-        # Prepare url
-        req = PreparedRequest()
-        params = {"page": page}
-        req.prepare_url(self.address, params)
-
-        # Visit link
-        self.driver.get(req.url)
-
-        # Get elements
-
-        return {"page": page, "status": "success", "url": req.url}
-
-
-
-if __name__ == "__main__":
-    spider = MultiPageSpider(driver=None, address="https://google.com", pages=2)
-    for response in iter(spider):
-        print(response)
