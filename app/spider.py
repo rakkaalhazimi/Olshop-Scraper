@@ -48,7 +48,7 @@ class Shopee(Spider):
 
 
 if __name__ == "__main__":
-    tokopedia = Tokopedia(url="https://tokopedia.com", headless=False)
+    tokopedia = Tokopedia(url="https://www.tokopedia.com/p/handphone-tablet/handphone", headless=False)
     # tokopedia.search("iphone 13")
     tokopedia.snapshot()
     tokopedia.scroll()
