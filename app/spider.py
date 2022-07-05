@@ -80,12 +80,12 @@ class Shopee(Spider):
     def search(self, keyword: str):
         try: 
             # Wait then find search bar
-            search_bar = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".e110g5pc0")))
+            search_bar = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".shopee-searchbar-input__input")))
             search_bar.clear() # search bar ga mau diclear
             search_bar.send_keys(keyword)
 
             # find submit button
-            search_button = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".css-1czin5k")))
+            search_button = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".shopee-searchbar__search-button")))
             search_button.click()
 
         except TimeoutException:
