@@ -1,9 +1,13 @@
-from driver import create_driver
-from driver import create_options
+import time
+
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+
+from driver import create_options
+from driver import create_driver
 
 
 class Spider:
@@ -13,7 +17,28 @@ class Spider:
         self.wait = WebDriverWait(self.driver, 5)
 
     def scroll(self):
-        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        SCROLL_PAUSE_TIME = 0.5
+
+        while True:
+            # Wait to load page
+            time.sleep(SCROLL_PAUSE_TIME)
+
+            # Scroll down to bottom
+            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+            # Get scroll height
+            last_height = self.driver.execute_script("return document.body.scrollHeight")
+            
+            # Calculate new scroll height and compare with last scroll height
+            new_height = self.driver.execute_script("return document.body.scrollHeight")
+
+            print(new_height, last_height)
+            if new_height == last_height:
+                break
+
+            last_height = new_height
+            
+
 
 
 class Tokopedia(Spider):
@@ -29,10 +54,11 @@ class Tokopedia(Spider):
             search_bar.clear() # search bar ga mau diclear
             search_bar.send_keys(keyword)
 
-             # find submit button
+            # find submit button
             search_button = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".css-1czin5k")))
             search_button.click()
-        except:
+
+        except TimeoutException:
             print("time out. Koneksi Internetmu mungkin lambat. Error: searchbar/search button")
             self.driver.quit()
 
@@ -50,8 +76,8 @@ class Shopee(Spider):
 if __name__ == "__main__":
     tokopedia = Tokopedia(url="https://www.tokopedia.com/p/handphone-tablet/handphone", headless=False)
     # tokopedia.search("iphone 13")
-    tokopedia.snapshot()
     tokopedia.scroll()
+    tokopedia.snapshot()
     tokopedia.quit()
 
 
