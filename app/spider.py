@@ -2,6 +2,7 @@ import time
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -59,8 +60,38 @@ class Tokopedia(Spider):
             search_button.click()
 
         except TimeoutException:
-            print("time out. Koneksi Internetmu mungkin lambat. Error: searchbar/search button")
+            print("time out. Koneksi Internetmu mungkin lambat.")
             self.driver.quit()
+        except NoSuchElementException:
+            print("Search bar error.")
+            self.driver.quit()
+
+    def grab(self, name: bool=True, price: bool=True, 
+                    shop: bool=True, location: bool=True ):
+
+        name_data, price_data, shop_data = [],[],[]
+
+        if name is True:
+            product_names = self.driver.find_elements_by_class_name("css-1b6t4dn") #pake css selector error
+            for product_name in product_names:
+                name_data.append(product_name.text)
+
+        if price is True:
+            product_prices = self.driver.find_elements_by_class_name("css-1ksb19c")
+            for product_price in product_prices:
+                price_data.append(product_price.text)
+
+        if shop is True: #location and shop belum dipisah
+            product_locations = self.driver.find_elements_by_class_name("css-1kdc32b")
+            for product_location in product_locations:
+                shop_data.append(product_location.text)
+
+        print(f'''name{name_data}={len(name_data)}, 
+        price{price_data}={len(price_data)}, 
+        locations{shop_data}={len(shop_data)}''') 
+        #total data cuma 18 produk, harusnya 80, max produk 80/page
+        # kemungkinan ada masalah di scroll()
+
 
     def snapshot(self):
         return self.driver.save_screenshot("tokopedia.png")
@@ -74,9 +105,10 @@ class Shopee(Spider):
 
 
 if __name__ == "__main__":
-    tokopedia = Tokopedia(url="https://www.tokopedia.com/p/handphone-tablet/handphone", headless=False)
-    # tokopedia.search("iphone 13")
+    tokopedia = Tokopedia(url="https://www.tokopedia.com/p/handphone-tablet/handphone", headless=True)
+    tokopedia.search("iphone 13")
     tokopedia.scroll()
+    tokopedia.grab()
     tokopedia.snapshot()
     tokopedia.quit()
 
