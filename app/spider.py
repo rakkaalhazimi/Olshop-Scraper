@@ -1,5 +1,5 @@
-from driver import get_driver
-from driver import get_options
+from driver import create_driver
+from driver import create_options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -9,8 +9,8 @@ from selenium.webdriver.common.keys import Keys
 class Olshop:
 
     def __init__(self):
-        self.head = get_options(headless=True) # kalau false baru bisa
-        self.driver = get_driver("chromedriver.exe", options=self.head)
+        self.head = create_options(headless=True) # kalau false baru bisa
+        self.driver = create_driver("chromedriver.exe", options=self.head)
         self.wait = WebDriverWait(self.driver, 5)
 
 
