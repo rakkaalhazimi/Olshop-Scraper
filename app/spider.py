@@ -1,7 +1,7 @@
 import time
 
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -60,7 +60,7 @@ class Tokopedia(Spider):
             search_button = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".css-1czin5k")))
             search_button.click()
 
-        except TimeoutException:
+        except (TimeoutException, NoSuchElementException) as e:
             print("time out. Koneksi Internetmu mungkin lambat. Error: searchbar/search button")
             self.driver.quit()
 
