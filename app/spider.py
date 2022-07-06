@@ -1,8 +1,10 @@
 import time
 
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -16,34 +18,18 @@ class Spider:
         self.head = create_options(headless=headless)
         self.driver = create_driver("chromedriver.exe", options=self.head)
         self.wait = WebDriverWait(self.driver, 5)
+        self.action = ActionChains(self.driver)
 
-    def scroll(self):
-        SCROLL_PAUSE_TIME = 0.5
+    def scroll(self, steps: str):
+        SCROLL_PAUSE_TIME = 2 # ini dan speed inet bisa pengaruh ke jumlah data yang dikoleksi
+        #jika speed inet lemot, scroll time bisa dinaikkan supaya jumlah data ditampilkan maximal
 
-        while True:
-            # Wait to load page
+        for down in range(0, steps):
+            self.action.send_keys(Keys.PAGE_DOWN).perform()
             time.sleep(SCROLL_PAUSE_TIME)
-
-            # Scroll down to bottom
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
-            # Get scroll height
-            last_height = self.driver.execute_script("return document.body.scrollHeight")
-            
-            # Calculate new scroll height and compare with last scroll height
-            new_height = self.driver.execute_script("return document.body.scrollHeight")
-
-            print(new_height, last_height)
-            if new_height == last_height:
-                break
-
-            last_height = new_height
             
 
-
-
-class Tokopedia(Spider):
-    
+class Tokopedia(Spider):    
     def __init__(self, url: str, **kwargs):
         super().__init__(**kwargs)
         self.url = self.driver.get(url)
@@ -69,26 +55,56 @@ class Tokopedia(Spider):
     def grab(self, name: bool=True, price: bool=True, 
                     shop: bool=True, location: bool=True ):
 
-        name_data, price_data, shop_data = [],[],[]
+        #location_ contain shop name and shop location
+        name_, price_, location_ = [],[],[]
 
         if name is True:
             product_names = self.driver.find_elements_by_class_name("css-1b6t4dn") #pake css selector error
             for product_name in product_names:
-                name_data.append(product_name.text)
+                name_.append(product_name.text)
 
         if price is True:
             product_prices = self.driver.find_elements_by_class_name("css-1ksb19c")
             for product_price in product_prices:
-                price_data.append(product_price.text)
+                price_.append(product_price.text)
 
-        if shop is True: #location and shop belum dipisah
-            product_locations = self.driver.find_elements_by_class_name("css-1kdc32b")
-            for product_location in product_locations:
-                shop_data.append(product_location.text)
+        if shop is True:
+            try: # produk rekomendasi tidak punya location_
+                recomended_prod = self.wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".css-kkkpmy")))#css selector box produk rekomendasi
+                for rec in recomended_prod:
+                    location_.append("-")
+                    location_.append("-")
+        # mendata semua lokasi produk
+            finally:
+                product_locations = self.driver.find_elements_by_class_name("css-1kdc32b")
+                for product_location in product_locations:
+                    location_.append(product_location.text)
+        
+        # Memisahkan data toko dengan data daerah
+        shop_name = []
+        city_location = []
+        city_locs_index = 0
+        shop_locs_index = 0
 
-        print(f'''name{name_data}={len(name_data)}, 
-        price{price_data}={len(price_data)}, 
-        locations{shop_data}={len(shop_data)}''') 
+        #city location terletak di baris ganjil dari list location_
+        for loc in location_:
+            city_locs_index += 1
+            if city_locs_index % 2 == 1:
+                city_location.append(location_[city_locs_index - 1])
+            else:
+                continue
+        #shop name terletak di baris genap dari list location_
+        for location in location_:
+            shop_locs_index += 1
+            if shop_locs_index % 2 == 0:
+                shop_name.append(location_[shop_locs_index - 1])
+            else:
+                continue
+
+        print(f'''name{name_}={len(name_)}\n, 
+        price{price_}={len(price_)}\n, 
+        shop name{shop_name}={len(shop_name)}\n,
+        city location{city_location}={len(city_location)}''') 
         #total data cuma 18 produk, harusnya 80, max produk 80/page
         # kemungkinan ada masalah di scroll()
 
@@ -107,7 +123,7 @@ class Shopee(Spider):
 if __name__ == "__main__":
     tokopedia = Tokopedia(url="https://www.tokopedia.com/p/handphone-tablet/handphone", headless=True)
     tokopedia.search("iphone 13")
-    tokopedia.scroll()
+    tokopedia.scroll(10)
     tokopedia.grab()
     tokopedia.snapshot()
     tokopedia.quit()
