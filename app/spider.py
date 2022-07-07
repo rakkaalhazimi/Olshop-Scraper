@@ -34,7 +34,17 @@ class Spider:
     def quit(self):
         return self.driver.quit()
 
-
+    def to_csv(self, data: str):
+        COLUMNS = ["Name", "Price", "Shop","Location"]  # write header
+        # create csv file
+        try:
+            with open("result.csv", "w", newline="", encoding="utf-8") as write:
+                write = csv.writer(write)
+                write.writerow(COLUMNS)
+        finally:
+            with open("result.csv", "a", newline="", encoding="utf-8") as write:
+                write = csv.writer(write)
+                write.writerow(data)
 
     def to_sql(self):
         pass
@@ -118,6 +128,7 @@ class Tokopedia(Spider):
             data_pool.append([])
             data_pool[data-1] = name_[data-1], price_[data-1], shop_name[data-1], city_location[data-1]
 
+        super().to_csv(data=data_pool)
 
         print(f'''name{name_}={len(name_)}\n, 
         price{price_}={len(price_)}\n, 
