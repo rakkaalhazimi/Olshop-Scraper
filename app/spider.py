@@ -22,7 +22,8 @@ class Spider:
         self.action = ActionChains(self.driver)
 
     def scroll(self, steps: int):
-        SCROLL_PAUSE_TIME = 1 # pause time & inet speed berpengaruh thd maximum data yang direcord
+        SCROLL_PAUSE_TIME = 0.5 # pause time & inet speed berpengaruh thd maximum data yang direcord
+        #harusnya max 80(+3)produk/page
 
         for down in range(0, steps):
             self.action.send_keys(Keys.PAGE_DOWN).perform()
@@ -33,7 +34,7 @@ class Spider:
     
     def quit(self):
         return self.driver.quit()
-
+    
     def to_csv(self, data: str):
         COLUMNS = ["Name", "Price", "Shop","Location"]  # write header
         # create csv file
@@ -44,7 +45,8 @@ class Spider:
         finally:
             with open("result.csv", "a", newline="", encoding="utf-8") as write:
                 write = csv.writer(write)
-                write.writerow(data)
+                write.writerows(data)
+
 
     def to_sql(self):
         pass
@@ -128,6 +130,7 @@ class Tokopedia(Spider):
             data_pool.append([])
             data_pool[data-1] = name_[data-1], price_[data-1], shop_name[data-1], city_location[data-1]
 
+        # record data_pool to csv file
         super().to_csv(data=data_pool)
 
         print(f'''name{name_}={len(name_)}\n, 
@@ -136,7 +139,6 @@ class Tokopedia(Spider):
         city location{city_location}={len(city_location)}\n''')
         print(f"Jumlah semua produk = {len(data_pool)}") 
         #total data cuma 18 produk, harusnya 80, max produk 80/page
-        # kemungkinan ada masalah di scroll()
 
 
 class Shopee(Spider):
