@@ -1,4 +1,5 @@
 import time
+import csv
 
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -20,13 +21,23 @@ class Spider:
         self.wait = WebDriverWait(self.driver, 5)
         self.action = ActionChains(self.driver)
 
-    def scroll(self, steps: str):
-        SCROLL_PAUSE_TIME = 2 # ini dan speed inet bisa pengaruh ke jumlah data yang dikoleksi
-        #jika speed inet lemot, scroll time bisa dinaikkan supaya jumlah data ditampilkan maximal
+    def scroll(self, steps: int):
+        SCROLL_PAUSE_TIME = 1 # pause time & inet speed berpengaruh thd maximum data yang direcord
 
         for down in range(0, steps):
             self.action.send_keys(Keys.PAGE_DOWN).perform()
             time.sleep(SCROLL_PAUSE_TIME)
+    
+    def snapshot(self):
+        return self.driver.save_screenshot("tokopedia.png")
+    
+    def quit(self):
+        return self.driver.quit()
+
+
+
+    def to_sql(self):
+        pass
             
 
 class Tokopedia(Spider):    
@@ -53,10 +64,11 @@ class Tokopedia(Spider):
             self.driver.quit()
 
     def grab(self, name: bool=True, price: bool=True, 
-                    shop: bool=True, location: bool=True ):
+                    shop: bool=True, location: bool=True, to_csv: bool=True ):
 
         #location_ contain shop name and shop location
         name_, price_, location_ = [],[],[]
+        data_pool = []
 
         if name is True:
             product_names = self.driver.find_elements_by_class_name("css-1b6t4dn") #pake css selector error
@@ -86,14 +98,14 @@ class Tokopedia(Spider):
         city_locs_index = 0
         shop_locs_index = 0
 
-        #city location terletak di baris ganjil dari list location_
+        #city location terletak di urutan ganjil dari list location_
         for loc in location_:
             city_locs_index += 1
             if city_locs_index % 2 == 1:
                 city_location.append(location_[city_locs_index - 1])
             else:
                 continue
-        #shop name terletak di baris genap dari list location_
+        #shop name terletak di urutan genap dari list location_
         for location in location_:
             shop_locs_index += 1
             if shop_locs_index % 2 == 0:
@@ -101,19 +113,19 @@ class Tokopedia(Spider):
             else:
                 continue
 
+        # Buat listed list [[name],[price],[city],[shop]]
+        for data in range(0, len(name_)):
+            data_pool.append([])
+            data_pool[data-1] = name_[data-1], price_[data-1], shop_name[data-1], city_location[data-1]
+
+
         print(f'''name{name_}={len(name_)}\n, 
         price{price_}={len(price_)}\n, 
         shop name{shop_name}={len(shop_name)}\n,
-        city location{city_location}={len(city_location)}''') 
+        city location{city_location}={len(city_location)}\n''')
+        print(f"Jumlah semua produk = {len(data_pool)}") 
         #total data cuma 18 produk, harusnya 80, max produk 80/page
         # kemungkinan ada masalah di scroll()
-
-
-    def snapshot(self):
-        return self.driver.save_screenshot("tokopedia.png")
-    
-    def quit(self):
-        return self.driver.quit()
 
 
 class Shopee(Spider):
@@ -121,7 +133,8 @@ class Shopee(Spider):
 
 
 if __name__ == "__main__":
-    tokopedia = Tokopedia(url="https://www.tokopedia.com/p/handphone-tablet/handphone", headless=True)
+    tokopedia = Tokopedia(url="https://www.tokopedia.com/p/handphone-tablet/handphone",
+    headless=True)
     tokopedia.search("iphone 13")
     tokopedia.scroll(10)
     tokopedia.grab()
