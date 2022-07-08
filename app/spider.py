@@ -1,4 +1,6 @@
 import time
+from typing import Tuple
+from urllib.parse import urlparse, parse_qs, urlencode
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
@@ -78,8 +80,37 @@ class Spider:
 
     
 
-    def click_next_page(self):
-        ...
+    def click_next_page(self, locator: Locator):
+        next_button = self.driver.find_element(*locator)
+        return next_button.click()
+
+
+    def redirect_next_page(self, page: int):
+        # Get current url
+        current_url = self.driver.current_url
+
+        # Parse url
+        parsed_url = urlparse(current_url)
+
+        # Parse query and assign new page
+        query_dict = parse_qs(parsed_url.query)
+        query_dict["page"] = page
+
+        # Encode query
+        new_query = urlencode(query_dict, doseq=True)
+
+        # Replace query with the newer one
+        new_url = parsed_url._replace(query=new_query).geturl()
+        
+        # Redirect to next page
+        self.driver.get(new_url)
+
+
+    def snapshot(self):
+        return self.driver.save_screenshot("browser.png")
+    
+    def quit(self):
+        return self.driver.quit()
             
 
 
@@ -90,26 +121,8 @@ class Tokopedia(Spider):
         super().__init__(**kwargs)
         self.url = self.driver.get(url)
 
-    def search(self, keyword: str):
-        try: 
-            # Wait then find search bar
-            search_bar = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".e110g5pc0")))
-            search_bar.clear() # search bar ga mau diclear
-            search_bar.send_keys(keyword)
-
-            # find submit button
-            search_button = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".css-1czin5k")))
-            search_button.click()
-
-        except (TimeoutException, NoSuchElementException) as e:
-            print("time out. Koneksi Internetmu mungkin lambat. Error: searchbar/search button")
-            self.driver.quit()
-
     def snapshot(self):
         return self.driver.save_screenshot("tokopedia.png")
-    
-    def quit(self):
-        return self.driver.quit()
 
 
 class Shopee(Spider):
@@ -118,45 +131,35 @@ class Shopee(Spider):
         super().__init__(**kwargs)
         self.url = self.driver.get(url)
 
-    def search(self, keyword: str):
-        try: 
-            # Wait then find search bar
-            search_bar = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".shopee-searchbar-input__input")))
-            search_bar.clear() # search bar ga mau diclear
-            search_bar.send_keys(keyword)
-
-            # find submit button
-            search_button = self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".shopee-searchbar__search-button")))
-            search_button.click()
-
-        except (TimeoutException, NoSuchElementException) as e:
-            print("time out. Koneksi Internetmu mungkin lambat. Error: searchbar/search button")
-            self.driver.quit()
-
     def snapshot(self):
         return self.driver.save_screenshot("shopee.png")
-    
-    def quit(self):
-        return self.driver.quit()
 
 
 if __name__ == "__main__":
-    # tokopedia = Tokopedia(
-    #     url="https://www.tokopedia.com/p/handphone-tablet/handphone", 
-    #     headless=False,
-    # )
-    # tokopedia.search("iphone 13")
-    # tokopedia.scroll_until_bottom()
-    # tokopedia.snapshot()
-    # tokopedia.quit()
-
-    shopee = Shopee(
-        url="https://shopee.co.id/", 
+    tokopedia = Tokopedia(
+        url="https://www.tokopedia.com/", 
         headless=False,
     )
-    shopee.search("iphone 13")
-    shopee.scroll_until_bottom()
-    shopee.snapshot()
-    shopee.quit()
+    tokopedia.search("iphone 13", locator=(By.CSS_SELECTOR, ".e110g5pc0"))
+    tokopedia.scroll_until_bottom()
+    time.sleep(1)
+    tokopedia.redirect_next_page(page=2)
+    time.sleep(1)
+    tokopedia.snapshot()
+    tokopedia.quit()
+
+    # shopee = Shopee(
+    #     url="https://shopee.co.id/", 
+    #     headless=False,
+    # )
+    # shopee.search("iphone 13", locator=(By.CSS_SELECTOR, ".shopee-searchbar-input__input"))
+    # shopee.scroll_until_bottom()
+    # shopee.click_next_page((By.CSS_SELECTOR, ".shopee-icon-button.shopee-icon-button--right"))
+    # shopee.scroll_until_bottom()
+    # shopee.click_next_page((By.CSS_SELECTOR, ".shopee-icon-button.shopee-icon-button--right"))
+    # shopee.scroll_until_bottom()
+    # time.sleep(2)
+    # shopee.snapshot()
+    # shopee.quit()
 
 
