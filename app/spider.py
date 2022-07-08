@@ -68,7 +68,7 @@ class Spider:
         ref: https://stackoverflow.com/questions/20986631/how-can-i-scroll-a-web-page-using-selenium-webdriver-in-python
         """
         SCROLL_PAUSE_TIME = 0.5
-        SCROLL_TRIES = 2
+        SCROLL_TRIES = 3
 
         # Select html tag
         html = self.driver.find_element(By.TAG_NAME, "html")
@@ -91,7 +91,6 @@ class Spider:
 
             last_diff = new_height - last_height
 
-            print(new_diff, last_diff)
             if new_diff == last_diff:
                 SCROLL_TRIES -= 1
 
