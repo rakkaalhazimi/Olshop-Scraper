@@ -1,9 +1,13 @@
+import csv
 import time
 from typing import Tuple
 from urllib.parse import urlparse, parse_qs, urlencode
 
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -20,6 +24,7 @@ class Spider:
         self.head = create_options(headless=headless)
         self.driver = create_driver("chromedriver.exe", options=self.head)
         self.wait = WebDriverWait(self.driver, 5)
+        self.action = ActionChains(self.driver)
 
 
     def search(self, keyword: str, locator: Locator):
