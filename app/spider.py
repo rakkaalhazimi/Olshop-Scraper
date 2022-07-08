@@ -12,11 +12,30 @@ from driver import create_options
 from driver import create_driver
 
 
+Locator = Tuple[str, str]
+
+
 class Spider:
     def __init__(self, headless: bool = True):
         self.head = create_options(headless=headless)
         self.driver = create_driver("chromedriver.exe", options=self.head)
         self.wait = WebDriverWait(self.driver, 5)
+
+
+    def search(self, keyword: str, locator: Locator):
+        try: 
+            # Wait then find search bar
+            search_bar = self.wait.until(
+                EC.presence_of_element_located(locator)
+            )
+            search_bar.clear() # search bar ga mau diclear
+            search_bar.send_keys(keyword)
+            search_bar.send_keys(Keys.ENTER)
+
+        except (TimeoutException, NoSuchElementException) as e:
+            print("time out. Koneksi Internetmu mungkin lambat. Error: searchbar/search button")
+            self.driver.quit()
+
 
     def scroll_infinitely(self):
         """_summary_
