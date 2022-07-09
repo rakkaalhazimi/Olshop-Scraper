@@ -189,6 +189,7 @@ class Tokopedia(Spider):
     def __init__(self, url: str, **kwargs):
         super().__init__(**kwargs)
         self.url = self.driver.get(url)
+        self.name = "Tokopedia"
 
     def snapshot(self):
         return self.driver.save_screenshot("tokopedia.png")
@@ -199,6 +200,7 @@ class Shopee(Spider):
     def __init__(self, url: str, **kwargs):
         super().__init__(**kwargs)
         self.url = self.driver.get(url)
+        self.name = "Shopee"
 
     def snapshot(self):
         return self.driver.save_screenshot("shopee.png")
