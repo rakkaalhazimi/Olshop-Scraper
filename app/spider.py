@@ -1,6 +1,7 @@
 import csv
+import json
 import time
-from typing import Tuple
+from typing import Tuple, Dict, List
 from urllib.parse import urlparse, parse_qs, urlencode
 
 from selenium.webdriver.common.keys import Keys
@@ -17,6 +18,7 @@ from driver import create_driver
 
 
 Locator = Tuple[str, str]
+Contents = Dict[str, Locator]
 
 
 class Spider:
