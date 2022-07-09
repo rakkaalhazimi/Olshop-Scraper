@@ -103,7 +103,31 @@ class Spider:
 
             new_diff = last_diff
 
+    def scroll_with_steps(self, steps: int):
+        # pause time & inet speed berpengaruh thd maximum data yang direcord
+        # harusnya max 80(+3)produk/page
+        SCROLL_PAUSE_TIME = 0.5
+        
+        for down in range(0, steps):
+            self.action.send_keys(Keys.PAGE_DOWN).perform()
+            time.sleep(SCROLL_PAUSE_TIME)
+
+
+    def grab(self, content: Contents):
+        return
+
     
+    def grab_by_parent(self, parent: Locator, content: Contents):
+        records = []
+        parent_tags = self.driver.find_elements(*parent)
+        for p_tag in parent_tags:
+            row = {}
+            for column, child in content.items():
+                c_tag = p_tag.find_element(*child)
+                row[column] = c_tag.text
+            records.append(row)
+        return records
+
 
     def click_next_page(self, locator: Locator):
         next_button = self.driver.find_element(*locator)
@@ -133,6 +157,26 @@ class Spider:
 
     def snapshot(self):
         return self.driver.save_screenshot("browser.png")
+
+
+    def to_csv(self, data: str):
+        COLUMNS = ["Name", "Price", "Shop","Location"]  # write header
+        # create csv file
+        try:
+            with open("result.csv", "w", newline="", encoding="utf-8") as write:
+                write = csv.writer(write)
+                write.writerow(COLUMNS)
+        finally:
+            with open("result.csv", "a", newline="", encoding="utf-8") as write:
+                write = csv.writer(write)
+                write.writerows(data)
+
+
+    def to_json(self, fn: str, records: List[Dict]):
+        with open(f"{fn}.json", "w") as file:
+            json_string = json.dumps(records)
+            file.write(json_string)
+
     
     def quit(self):
         return self.driver.quit()
@@ -167,7 +211,17 @@ if __name__ == "__main__":
     )
     tokopedia.search("iphone 13", locator=(By.CSS_SELECTOR, ".e110g5pc0"))
     tokopedia.scroll_until_bottom()
-    time.sleep(1)
+    time.sleep(2)
+    records = tokopedia.grab_by_parent(
+        parent=(By.CSS_SELECTOR, ".css-12sieg3"),
+        content={
+            "name": (By.CSS_SELECTOR, ".css-1b6t4dn"),
+            "price": (By.CSS_SELECTOR, ".css-1ksb19c"),
+            "location": (By.CSS_SELECTOR, ".css-1kdc32b:nth-child(1)"),
+            "shop": (By.CSS_SELECTOR, ".css-1kdc32b:nth-child(2)"),
+        }
+    )
+    tokopedia.to_json("record1", records=records)
     tokopedia.redirect_next_page(page=2)
     time.sleep(1)
     tokopedia.snapshot()
