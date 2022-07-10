@@ -84,18 +84,14 @@ class Spider:
         SCROLL_PAUSE_TIME = 0.5
         SCROLL_TRIES = 3
 
-        # Select html tag
-        html = self.driver.find_element(By.TAG_NAME, "html")
-
         new_diff = -1
-        
 
         while SCROLL_TRIES > 1:
             # Wait to load page
             time.sleep(SCROLL_PAUSE_TIME)
 
             # Press page down on browser
-            html.send_keys(Keys.PAGE_DOWN)
+            self.action.send_keys(Keys.PAGE_DOWN).perform()
 
             # Get current height after scroll
             last_height = self.driver.execute_script("return window.pageYOffset")
