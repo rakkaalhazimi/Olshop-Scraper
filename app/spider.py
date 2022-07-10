@@ -41,9 +41,14 @@ class Spider:
             search_bar.send_keys(keyword)
             search_bar.send_keys(Keys.ENTER)
 
-        except (TimeoutException, NoSuchElementException) as e:
-            print("time out. Koneksi Internetmu mungkin lambat. Error: searchbar/search button")
+        except TimeoutException:
+            print("[ERROR] Request timeout - Your internet connection is slow")
             self.driver.quit()
+
+        except NoSuchElementException:
+            print("[ERROR] Element not found - No search bar found")
+            self.driver.quit()
+
 
 
     def scroll_infinitely(self):
