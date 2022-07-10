@@ -180,53 +180,22 @@ class Spider:
 
 
     def to_json(self, fn: str, records: List[Dict]):
-        with open(f"{fn}.json", "w") as file:
+        
+        # Create dir if not exists
+        dir_ = os.path.join(SCRAP_DIR, self.name)
+        if not os.path.exists(dir_):
+            os.mkdir(SCRAP_DIR)
+            os.mkdir(dir_)
+
+        # Write records to json
+        path_ = os.path.join(dir_, fn)
+        with open(f"{path_}.json", "w") as file:
             json_string = json.dumps(records)
             file.write(json_string)
+
 
     def snapshot(self, filename: str = None):
         return self.driver.save_screenshot(f"{filename or self.name}.png")
     
     def quit(self):
         return self.driver.quit()
- 
-
-
-if __name__ == "__main__":
-    tokopedia = TokopediaSpider(
-        url="https://www.tokopedia.com/", 
-        driver=0
-    )
-    tokopedia.search("iphone 13", locator=(By.CSS_SELECTOR, ".e110g5pc0"))
-    tokopedia.scroll_until_bottom()
-    time.sleep(2)
-    records = tokopedia.grab_by_parent(
-        parent=(By.CSS_SELECTOR, ".css-12sieg3"),
-        content={
-            "name": (By.CSS_SELECTOR, ".css-1b6t4dn"),
-            "price": (By.CSS_SELECTOR, ".css-1ksb19c"),
-            "location": (By.CSS_SELECTOR, ".css-1kdc32b:nth-child(1)"),
-            "shop": (By.CSS_SELECTOR, ".css-1kdc32b:nth-child(2)"),
-        }
-    )
-    tokopedia.to_json("record1", records=records)
-    tokopedia.redirect_next_page(page=2)
-    time.sleep(1)
-    tokopedia.snapshot()
-    tokopedia.quit()
-
-    # shopee = Shopee(
-    #     url="https://shopee.co.id/", 
-    #     headless=False,
-    # )
-    # shopee.search("iphone 13", locator=(By.CSS_SELECTOR, ".shopee-searchbar-input__input"))
-    # shopee.scroll_until_bottom()
-    # shopee.click_next_page((By.CSS_SELECTOR, ".shopee-icon-button.shopee-icon-button--right"))
-    # shopee.scroll_until_bottom()
-    # shopee.click_next_page((By.CSS_SELECTOR, ".shopee-icon-button.shopee-icon-button--right"))
-    # shopee.scroll_until_bottom()
-    # time.sleep(2)
-    # shopee.snapshot()
-    # shopee.quit()
-
-
