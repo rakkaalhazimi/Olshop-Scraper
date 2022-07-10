@@ -29,7 +29,7 @@ class Spider:
         self.action = ActionChains(self.driver)
 
     def start(self):
-        self.driver(self.url)
+        self.driver.get(self.url)
 
     def search(self, keyword: str, locator: Locator):
         try: 
@@ -195,6 +195,7 @@ class Spider:
 if __name__ == "__main__":
     tokopedia = TokopediaSpider(
         url="https://www.tokopedia.com/", 
+        driver=0
     )
     tokopedia.search("iphone 13", locator=(By.CSS_SELECTOR, ".e110g5pc0"))
     tokopedia.scroll_until_bottom()
