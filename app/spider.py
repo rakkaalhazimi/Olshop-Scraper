@@ -4,6 +4,7 @@ import time
 from typing import Tuple, Dict, List
 from urllib.parse import urlparse, parse_qs, urlencode
 
+from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
@@ -13,21 +14,22 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
-from driver import create_options
-from driver import create_driver
-
 
 Locator = Tuple[str, str]
 Contents = Dict[str, Locator]
 
 
+
 class Spider:
-    def __init__(self, headless: bool = True):
-        self.head = create_options(headless=headless)
-        self.driver = create_driver("chromedriver.exe", options=self.head)
+    def __init__(self, name: str, url: str, driver: WebDriver):
+        self.driver = driver
+        self.name = name
+        self.url = url
         self.wait = WebDriverWait(self.driver, 5)
         self.action = ActionChains(self.driver)
 
+    def start(self):
+        self.driver(self.url)
 
     def search(self, keyword: str, locator: Locator):
         try: 
@@ -177,37 +179,16 @@ class Spider:
             json_string = json.dumps(records)
             file.write(json_string)
 
+    def snapshot(self, filename: str = None):
+        return self.driver.save_screenshot(f"{filename or self.name}.png")
     
     def quit(self):
         return self.driver.quit()
-            
-
-
-
-class Tokopedia(Spider):
-    
-    def __init__(self, url: str, **kwargs):
-        super().__init__(**kwargs)
-        self.url = self.driver.get(url)
-        self.name = "Tokopedia"
-
-    def snapshot(self):
-        return self.driver.save_screenshot("tokopedia.png")
-
-
-class Shopee(Spider):
-    
-    def __init__(self, url: str, **kwargs):
-        super().__init__(**kwargs)
-        self.url = self.driver.get(url)
-        self.name = "Shopee"
-
-    def snapshot(self):
-        return self.driver.save_screenshot("shopee.png")
+ 
 
 
 if __name__ == "__main__":
-    tokopedia = Tokopedia(
+    tokopedia = TokopediaSpider(
         url="https://www.tokopedia.com/", 
     )
     tokopedia.search("iphone 13", locator=(By.CSS_SELECTOR, ".e110g5pc0"))
