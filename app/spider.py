@@ -1,6 +1,8 @@
 import csv
 import json
+import os
 import time
+from tqdm import tqdm
 from typing import Tuple, Dict, List
 from urllib.parse import urlparse, parse_qs, urlencode
 
@@ -17,6 +19,7 @@ from selenium.webdriver.common.keys import Keys
 
 Locator = Tuple[str, str]
 Contents = Dict[str, Locator]
+SCRAP_DIR = "scrap_results"
 
 
 
@@ -129,6 +132,7 @@ class Spider:
                 c_tag = p_tag.find_element(*child)
                 row[column] = c_tag.text
             records.append(row)
+            
         return records
 
 
