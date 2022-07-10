@@ -1,7 +1,11 @@
+import platform
 from typing import Tuple, List
 from selenium.webdriver import chrome
 from selenium import webdriver
 
+OS_NAME = platform.system()
+LINUX_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36"
+WIN_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36"
 
 def create_options(
         headless: bool = True,
@@ -13,8 +17,12 @@ def create_options(
 
     if headless:
         options.add_argument("--headless")
-        user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36"
-        options.add_argument(f"user-agent={user_agent}")
+
+    if OS_NAME == "Linux":
+        options.add_argument(f"user-agent={LINUX_USER_AGENT}")
+    else:
+        options.add_argument(f"user-agent={WIN_USER_AGENT}")
+    
     options.add_argument(f"--window-size={width},{height}")
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--allow-running-insecure-content')
@@ -30,7 +38,7 @@ def create_options(
 
 
 def create_driver(
-        path: str = "chromedriver.exe",
+        path: str = None,
         options: chrome.options.Options = None
     ):
 

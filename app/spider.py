@@ -209,7 +209,6 @@ class Shopee(Spider):
 if __name__ == "__main__":
     tokopedia = Tokopedia(
         url="https://www.tokopedia.com/", 
-        headless=False,
     )
     tokopedia.search("iphone 13", locator=(By.CSS_SELECTOR, ".e110g5pc0"))
     tokopedia.scroll_until_bottom()
