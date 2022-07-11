@@ -123,12 +123,12 @@ class Spider:
         return
 
     
-    def grab_by_parent(self, parent: Locator, content: Contents):
+    def grab_by_parent(self, parent: Locator, contents: Contents):
         records = []
         parent_tags = self.driver.find_elements(*parent)
         for p_tag in parent_tags:
             row = {}
-            for column, child in content.items():
+            for column, child in contents.items():
                 c_tag = p_tag.find_element(*child)
                 row[column] = c_tag.text
             records.append(row)
