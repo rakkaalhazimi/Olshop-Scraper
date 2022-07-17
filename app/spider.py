@@ -125,8 +125,12 @@ class Spider:
         for p_tag in parent_tags:
             row = {}
             for column, child in contents.items():
-                c_tag = p_tag.find_element(*child)
-                row[column] = c_tag.text
+                by, value = child
+                c_tag = p_tag.find_element(by, value)
+                if value == "a":
+                    row[column] = c_tag.get_attribute("href")
+                else:
+                    row[column] = c_tag.text
             records.append(row)
             
         return records
