@@ -83,11 +83,10 @@ class Spider:
         """_summary_
         ref: https://stackoverflow.com/questions/20986631/how-can-i-scroll-a-web-page-using-selenium-webdriver-in-python
         """
-        SCROLL_TRIES = 3
-
+        scroll_tries = 3
         new_diff = -1
 
-        while SCROLL_TRIES > 1:
+        while scroll_tries > 1:
             # Wait to load page
             time.sleep(SCROLL_PAUSE_TIME)
 
@@ -103,7 +102,7 @@ class Spider:
             last_diff = new_height - last_height
 
             if new_diff == last_diff:
-                SCROLL_TRIES -= 1
+                scroll_tries -= 1
 
             new_diff = last_diff
 
