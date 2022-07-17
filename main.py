@@ -40,22 +40,31 @@ if __name__ == "__main__":
             "price": (By.CSS_SELECTOR, ".css-1ksb19c"),
             "location": (By.CSS_SELECTOR, ".css-1kdc32b:nth-child(1)"),
             "shop": (By.CSS_SELECTOR, ".css-1kdc32b:nth-child(2)"),
+            "link": (By.CSS_SELECTOR, "a")
         }
     )
 
-    tokopedia_crawler.execute()
+    # tokopedia_crawler.execute()
 
 
-    # shopee = Shopee(
-    #     url="https://shopee.co.id/", 
-    #     headless=False,
-    # )
-    # shopee.search("iphone 13", locator=(By.CSS_SELECTOR, ".shopee-searchbar-input__input"))
-    # shopee.scroll_until_bottom()
-    # shopee.click_next_page((By.CSS_SELECTOR, ".shopee-icon-button.shopee-icon-button--right"))
-    # shopee.scroll_until_bottom()
-    # shopee.click_next_page((By.CSS_SELECTOR, ".shopee-icon-button.shopee-icon-button--right"))
-    # shopee.scroll_until_bottom()
-    # time.sleep(2)
-    # shopee.snapshot()
-    # shopee.quit()
+    shopee = Spider(
+        name="Shopee",
+        url="https://shopee.co.id/", 
+        driver=driver,
+    )
+
+    shopee_crawler = MultiPageCrawler(
+        spider=shopee, 
+        pages=1, 
+        search_keyword="iphone 13",
+        search_bar=(By.CSS_SELECTOR, ".shopee-searchbar-input__input"),
+        contents_parent=(By.CSS_SELECTOR, ".shopee-search-item-result__item"),
+        contents={
+            "name": (By.CSS_SELECTOR, ".ie3A\+n.bM\+7UW.Cve6sh"),
+            "price": (By.CSS_SELECTOR, ".ZEgDH9"),
+            "location": (By.CSS_SELECTOR, ".zGGwiV"),
+            "link": (By.CSS_SELECTOR, "a")
+        }
+    )
+
+    shopee_crawler.execute()
