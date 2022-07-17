@@ -13,13 +13,13 @@ from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 
 Locator = Tuple[str, str]
 Contents = Dict[str, Locator]
 SCRAP_DIR = "scrap_results"
+SCROLL_PAUSE_TIME = 0.5
 
 
 
@@ -59,7 +59,6 @@ class Spider:
 
         ref: https://stackoverflow.com/questions/20986631/how-can-i-scroll-a-web-page-using-selenium-webdriver-in-python
         """
-        SCROLL_PAUSE_TIME = 0.5
 
         while True:
             # Wait to load page
@@ -84,7 +83,6 @@ class Spider:
         """_summary_
         ref: https://stackoverflow.com/questions/20986631/how-can-i-scroll-a-web-page-using-selenium-webdriver-in-python
         """
-        SCROLL_PAUSE_TIME = 0.5
         SCROLL_TRIES = 3
 
         new_diff = -1
@@ -112,7 +110,6 @@ class Spider:
     def scroll_with_steps(self, steps: int):
         # pause time & inet speed berpengaruh thd maximum data yang direcord
         # harusnya max 80(+3)produk/page
-        SCROLL_PAUSE_TIME = 0.5
         
         for down in range(0, steps):
             self.action.send_keys(Keys.PAGE_DOWN).perform()
