@@ -14,7 +14,7 @@ RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
 # set display port to avoid crash
 ENV DISPLAY=:99
 
-RUN git clone -b docker https://github.com/rakkaalhazimi/Olshop-Scraper.git
+RUN git clone -b dev https://github.com/rakkaalhazimi/Olshop-Scraper.git
 
 WORKDIR Olshop-Scraper/
 
