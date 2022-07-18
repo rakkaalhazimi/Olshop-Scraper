@@ -185,9 +185,12 @@ class Spider:
     def to_json(self, fn: str, records: List[Dict]):
         
         # Create dir if not exists
-        dir_ = os.path.join(SCRAP_DIR, self.name)
-        if not os.path.exists(dir_):
+        if not os.path.exists(SCRAP_DIR):
             os.mkdir(SCRAP_DIR)
+
+        dir_ = os.path.join(SCRAP_DIR, self.name)
+
+        if not os.path.exists(dir_):
             os.mkdir(dir_)
 
         # Write records to json
