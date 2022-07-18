@@ -128,16 +128,14 @@ class Spider:
         records = []
         parent_tags = self.driver.find_elements(*parent)
         for p_tag in parent_tags:
+
             row = {}
             for column, child in contents.items():
-                by, value = child
+                by, value, picks = child
                 c_tag = p_tag.find_element(by, value)
-                if value == "a":
-                    row[column] = c_tag.get_attribute("href")
-                else:
-                    row[column] = c_tag.text
+                row[column] = picks(tag=c_tag)
+
             records.append(row)
-            
         return records
 
 
