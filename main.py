@@ -23,9 +23,9 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
     mongo_client = connect_cluster(os.getenv("mongo_user"), os.getenv("mongo_pass"))
-    driver = DefaultWebDriver(headless=args.headless).create_driver()
 
     # Tokopedia
+    driver = DefaultWebDriver(headless=args.headless).create_driver()
     tokopedia = Spider(
         name="Tokopedia",
         url="https://www.tokopedia.com/", 
@@ -51,6 +51,7 @@ if __name__ == "__main__":
     tokopedia_crawler.execute()
 
     # Shopee
+    driver = DefaultWebDriver(headless=args.headless).create_driver()
     shopee = Spider(
         name="Shopee",
         url="https://shopee.co.id/", 
