@@ -3,9 +3,10 @@ import json
 import os
 import time
 from tqdm import tqdm
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict, List, Callable
 from urllib.parse import urlparse, parse_qs, urlencode
 
+from pymongo.mongo_client import MongoClient
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -17,17 +18,21 @@ from selenium.webdriver.common.keys import Keys
 
 
 Locator = Tuple[str, str]
-Contents = Dict[str, Locator]
+LocatorPicks = Tuple[str, str, Callable]
+Contents = Dict[str, LocatorPicks]
+
 SCRAP_DIR = "scrap_results"
 SCROLL_PAUSE_TIME = 0.5
+MONGO_DATABASE = "Olshop"
 
 
 
 class Spider:
-    def __init__(self, name: str, url: str, driver: WebDriver):
+    def __init__(self, name: str, url: str, driver: WebDriver, mongo_client: MongoClient = None):
         self.driver = driver
         self.name = name
         self.url = url
+        self.mongo_client = mongo_client
         self.wait = WebDriverWait(self.driver, 5)
         self.action = ActionChains(self.driver)
 
@@ -192,6 +197,12 @@ class Spider:
         with open(f"{path_}.json", "w") as file:
             json_string = json.dumps(records)
             file.write(json_string)
+
+
+    def to_mongo_cluster(self, records: List[Dict]):
+        database = self.mongo_client[MONGO_DATABASE]
+        collection = database[self.name]
+        return collection.insert_many(records)
 
 
     def snapshot(self, filename: str = None):

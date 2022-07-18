@@ -44,7 +44,7 @@ class MultiPageCrawler(Crawler):
                         parent=self.contents_parent,
                         contents=self.contents
                     )
-                    self.spider.to_json(f"record_{page - 1}", records=records)
+                    self.spider.to_mongo_cluster(records)
 
                 self.spider.redirect_next_page(page=page)
 
