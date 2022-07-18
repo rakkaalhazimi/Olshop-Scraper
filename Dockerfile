@@ -14,8 +14,12 @@ RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
 # set display port to avoid crash
 ENV DISPLAY=:99
 
-RUN git clone -b dev https://github.com/rakkaalhazimi/Olshop-Scraper.git
+# prepare my workplace
+# RUN git clone -b dev https://github.com/rakkaalhazimi/Olshop-Scraper.git
+COPY . Olshop-Scraper
 
-WORKDIR Olshop-Scraper/
+WORKDIR Olshop-Scraper
 
 RUN pip install -r requirements.txt
+
+ENTRYPOINT [ "python", "main.py" ]
