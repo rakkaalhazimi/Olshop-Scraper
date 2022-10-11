@@ -1,76 +1,88 @@
 import argparse
-import os
+import time
 
 from dotenv import load_dotenv; load_dotenv()
-from selenium.webdriver.common.by import By
 
-from app.crawler import MultiPageCrawler
 from app.driver import DefaultWebDriver
-from app.mongo import connect_cluster
-from app.pick import pick_text, pick_attribute
-from app.spider import Spider
+from app.crawler import Reaper
+from app.types.selector import CssSelector
+
+
 
 parser = argparse.ArgumentParser(description="Online Shop scrapper with selenium")
 
 parser.add_argument(
-    "--headless", action="store_true", default=True, help="run webdriver with headless mode (default)")
+    "-n",
+    "--name", 
+    default="",
+    required=False,
+    dest="name",
+    help="name of the scraper."
+)
+
 parser.add_argument(
-    "--no_headless", action="store_false", dest="headless", help="run webdriver without headless mode")
+    "--url", 
+    required=False,
+    dest="url",
+    help="initial website url."
+)
+
+parser.add_argument(
+    "--no_headless", 
+    action="store_false", 
+    default=True,
+    dest="headless",
+    help="run webdriver without headless mode."
+)
 
 
-args = parser.parse_args()
+options = parser.parse_args()
 
 
 if __name__ == "__main__":
-    mongo_client = connect_cluster(os.getenv("mongo_user"), os.getenv("mongo_pass"))
+    # Create driver and crawler
+    driver = DefaultWebDriver(headless=options.headless).create_driver()
+    reaper = Reaper(driver=driver)
 
-    # Tokopedia
-    driver = DefaultWebDriver(headless=args.headless).create_driver()
-    tokopedia = Spider(
-        name="Tokopedia",
-        url="https://www.tokopedia.com/", 
-        driver=driver,
-        mongo_client=mongo_client
-    )
+    # Crawl the webpage
+    reaper.go_to_url("https://shopee.co.id")
+    reaper.search("iphone13", CssSelector(".shopee-searchbar-input__input"))
+    reaper.wait(3)
+    reaper.scroll_until_bottom()
+    search_item = reaper.get_elements(driver, CssSelector(".shopee-search-item-result__item"))
+    product_names = reaper.get_elements_multi(search_item, CssSelector(".ie3A\+n.bM\+7UW.Cve6sh"))
+    product_names = reaper.get_elements_text(product_names)
+    
+    print(product_names)
 
-    tokopedia_crawler = MultiPageCrawler(
-        spider=tokopedia, 
-        pages=1, 
-        search_keyword="iphone 13",
-        search_bar=(By.CSS_SELECTOR, ".e110g5pc0"),
-        contents_parent=(By.CSS_SELECTOR, ".css-12sieg3"),
-        contents={
-            "name": (By.CSS_SELECTOR, ".css-1b6t4dn", pick_text()),
-            "price": (By.CSS_SELECTOR, ".css-1ksb19c", pick_text()),
-            "location": (By.CSS_SELECTOR, ".css-1kdc32b:nth-child(1)", pick_text()),
-            "shop": (By.CSS_SELECTOR, ".css-1kdc32b:nth-child(2)", pick_text()),
-            "link": (By.CSS_SELECTOR, "a", pick_attribute("href") )
-        }
-    )
+    reaper.quit()
+    
 
-    tokopedia_crawler.execute()
+#  tokopedia_crawler = MultiPageCrawler(
+#         spider=tokopedia, 
+#         pages=1, 
+#         search_keyword="iphone 13",
+#         search_bar=(By.CSS_SELECTOR, ".e110g5pc0"),
+#         contents_parent=(By.CSS_SELECTOR, ".css-12sieg3"),
+#         contents={
+#             "name": (By.CSS_SELECTOR, ".css-1b6t4dn", pick_text()),
+#             "price": (By.CSS_SELECTOR, ".css-1ksb19c", pick_text()),
+#             "location": (By.CSS_SELECTOR, ".css-1kdc32b:nth-child(1)", pick_text()),
+#             "shop": (By.CSS_SELECTOR, ".css-1kdc32b:nth-child(2)", pick_text()),
+#             "link": (By.CSS_SELECTOR, "a", pick_attribute("href") )
+#         }
+#     )
 
-    # Shopee
-    driver = DefaultWebDriver(headless=args.headless).create_driver()
-    shopee = Spider(
-        name="Shopee",
-        url="https://shopee.co.id/", 
-        driver=driver,
-        mongo_client=mongo_client
-    )
-
-    shopee_crawler = MultiPageCrawler(
-        spider=shopee, 
-        pages=1, 
-        search_keyword="iphone 13",
-        search_bar=(By.CSS_SELECTOR, ".shopee-searchbar-input__input"),
-        contents_parent=(By.CSS_SELECTOR, ".shopee-search-item-result__item"),
-        contents={
-            "name": (By.CSS_SELECTOR, ".ie3A\+n.bM\+7UW.Cve6sh", pick_text()),
-            "price": (By.CSS_SELECTOR, ".ZEgDH9", pick_text()),
-            "location": (By.CSS_SELECTOR, ".zGGwiV", pick_text()),
-            "link": (By.CSS_SELECTOR, "a", pick_attribute("href"))
-        }
-    )
-
-    shopee_crawler.execute()
+# shopee_crawler = MultiPageCrawler(
+#         spider=shopee, 
+#         pages=1, 
+#         search_keyword="iphone 13",
+#         search_bar=(By.CSS_SELECTOR, ".shopee-searchbar-input__input"),
+#         contents_parent=(By.CSS_SELECTOR, ".shopee-search-item-result__item"),
+#         contents={
+#             "name": (By.CSS_SELECTOR, ".ie3A\+n.bM\+7UW.Cve6sh", pick_text()),
+#             "price": (By.CSS_SELECTOR, ".ZEgDH9", pick_text()),
+#             "location": (By.CSS_SELECTOR, ".zGGwiV", pick_text()),
+#             "link": (By.CSS_SELECTOR, "a", pick_attribute("href"))
+#         }
+#     )

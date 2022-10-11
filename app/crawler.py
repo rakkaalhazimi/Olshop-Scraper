@@ -1,58 +1,67 @@
-from selenium.webdriver.common.by import By
+from typing import List
 
-from app.driver import DefaultWebDriver
-from app.spider import Spider, Contents, Locator
+from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.remote.webelement import WebElement
 
-
-class Crawler:
-    def execute(self):
-        return NotImplementedError("Cannot call directly on superclass, please call on subclass")
+from app.core import ReaperCollector, ReaperNavigator, ReaperExporter
+from app.types.selector import Selector
 
 
-class MultiPageCrawler(Crawler):
-    def __init__(
-            self, 
-            spider: Spider, 
-            pages: int, 
-            search_keyword: str = "", 
-            search_bar: Locator = None,
-            contents_parent: Locator = None,
-            contents: Contents = None
-        ):
-        self.spider = spider
-        self.pages = pages
-        self.search_keyword = search_keyword
-        self.search_bar = search_bar
-        self.contents_parent = contents_parent
-        self.contents = contents
 
+class Reaper:
+    def __init__(self, driver: WebDriver):
+        self.driver = driver
+        self.navigator = ReaperNavigator(driver)
+        self.exporter = ReaperExporter()
+        self.collector = ReaperCollector()
 
-    def execute(self):
+    def click(self, selector: Selector):
+        self.navigator.click(selector)
 
-        self.spider.start()
-        print(f"[RUN] Scraping {self.spider.name}")
+    def get_element(self, element: WebDriver or WebElement, selector: Selector):
+        return self.collector.get_element(element, selector)
 
-        if self.search_bar:
-            print("[RUN] Using search bar")
-            self.spider.search(self.search_keyword, self.search_bar)
+    def get_elements(self, element: WebDriver or WebElement, selector: Selector):
+        return self.collector.get_elements(element, selector)
 
-        try:
-            for page in range(2, self.pages + 2):
-                self.spider.driver.implicitly_wait(1)
-                print("[RUN] scrolling...")
-                self.spider.scroll_until_bottom()
+    def get_element_attr(self, element: WebElement, key: str):
+        return self.collector.get_element_attr(element, key)
 
-                if self.contents_parent and self.contents:
-                    print("[RUN] scraping website..")
-                    records = self.spider.grab_by_parent(
-                        parent=self.contents_parent,
-                        contents=self.contents
-                    )
-                    print("[RUN] inserted into mongo cluster")
-                    self.spider.to_mongo_cluster(records)
+    def get_elements_attr(self, elements: List[WebElement], key: str):
+        return self.collector.get_elements_attr(elements, key)
 
-                print("[RUN] go to the next page")
-                self.spider.redirect_next_page(page=page)
+    def get_elements_multi(self, elements: List[WebElement], selector: Selector):
+        return self.collector.get_elements_multi(elements, selector)
 
-        finally:
-            self.spider.quit()
+    def get_element_text(self, element: WebElement):
+        return self.collector.get_element_text(element)
+
+    def get_elements_text(self, elements: List[WebElement]):
+        return self.collector.get_elements_text(elements)
+
+    def go_to_url(self, url):
+        self.navigator.go_to_url(url)
+
+    def redirect_next_page(self):
+        self.navigator.redirect_next_page()
+
+    def search(self, keyword: str, selector: Selector):
+        self.navigator.search(keyword, selector)
+
+    def scroll_infinitely(self):
+        self.navigator.scroll_infinitely()
+
+    def scroll_until_bottom(self):
+        self.navigator.scroll_until_bottom()
+
+    def scroll_with_steps(self, steps: int):
+        self.navigator.scroll_with_steps(steps)
+
+    def snapshot(self, filename: str = None):
+        self.navigator.snapshot(filename)
+
+    def quit(self):
+        self.navigator.quit()
+
+    def wait(self, seconds):
+        self.navigator.implicit_wait(seconds)
