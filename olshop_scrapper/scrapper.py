@@ -49,76 +49,84 @@ class Scrapper(ABC):
         time.sleep(2)
 
     @abstractmethod
-    def find_product(self, name: str) -> List[Mapping[str, str]]:
+    def find_product(self, name: str, pages: int) -> List[Mapping[str, str]]:
         ...
 
 
 class TokopediaScrapper(Scrapper):
-    def find_product(self, name: str) -> List[Mapping[str, str]]:
+    def find_product(self, name: str, pages: int = 1) -> List[Mapping[str, str]]:
         self.driver.get("https://www.tokopedia.com/")
         self.use_search_bar(name, "//input[@class='css-3017qm exxxdg63']")
         self.scroll_until_bottom()
 
-        # Fetch product data
+        current_page = 0
         products = []
-        block_elements = self.driver.find_elements(By.XPATH, "//div[@class='css-llwpbs']")
 
-        for block in block_elements:
-            inner_html = block.get_attribute("innerHTML")
-            soup = BeautifulSoup(inner_html, "html.parser")
+        while current_page < pages:
+            # Fetch product data
+            block_elements = self.driver.find_elements(By.XPATH, "//div[@class='css-llwpbs']")
 
-            url = soup.select_one("div.css-1f2quy8 > a")
-            if url:
-                url = url.attrs.get("href")
+            for block in block_elements:
+                inner_html = block.get_attribute("innerHTML")
+                soup = BeautifulSoup(inner_html, "html.parser")
 
-            image_url = soup.select_one("img.css-1q90pod")
-            if image_url:
-                image_url = image_url.attrs.get("src")
+                url = soup.select_one("div.css-1f2quy8 > a")
+                if url:
+                    url = url.attrs.get("href")
 
-            pname = soup.select_one("div[data-testid='spnSRPProdName']")
-            if pname:
-                pname = pname.text
+                image_url = soup.select_one("img.css-1q90pod")
+                if image_url:
+                    image_url = image_url.attrs.get("src")
 
-            place = soup.select_one("span[data-testid='spnSRPProdTabShopLoc']")
-            if place:
-                place = place.text
+                pname = soup.select_one("div[data-testid='spnSRPProdName']")
+                if pname:
+                    pname = pname.text
 
-            seller = soup.select_one("div.css-1rn0irl > span:nth-child(2)")
-            if seller:
-                seller = seller.text
+                place = soup.select_one("span[data-testid='spnSRPProdTabShopLoc']")
+                if place:
+                    place = place.text
 
-            current_price = soup.select_one("div[data-testid='spnSRPProdPrice']")
-            if current_price:
-                current_price = current_price.text
+                seller = soup.select_one("div.css-1rn0irl > span:nth-child(2)")
+                if seller:
+                    seller = seller.text
 
-            previous_price = soup.select_one("div[data-testid='lblProductSlashPrice']")
-            if previous_price:
-                previous_price = previous_price.text
+                current_price = soup.select_one("div[data-testid='spnSRPProdPrice']")
+                if current_price:
+                    current_price = current_price.text
 
-            rating = soup.select_one("span.prd_rating-average-text.css-t70v7i")
-            if rating:
-                rating = rating.text
+                previous_price = soup.select_one("div[data-testid='lblProductSlashPrice']")
+                if previous_price:
+                    previous_price = previous_price.text
 
-            sold = soup.select_one("span.prd_label-integrity.css-1duhs3e")
-            if sold:
-                sold = sold.text
+                rating = soup.select_one("span.prd_rating-average-text.css-t70v7i")
+                if rating:
+                    rating = rating.text
 
-            trait = soup.select_one("div[aria-label='price label']")
-            if trait:
-                trait = trait.text
+                sold = soup.select_one("span.prd_label-integrity.css-1duhs3e")
+                if sold:
+                    sold = sold.text
 
-            product = TokopediaProductModel(
-                url=url,
-                image_url=image_url,
-                name=pname,
-                place=place,
-                seller=seller,
-                current_price=current_price,
-                previous_price=previous_price,
-                rating=rating,
-                sold=sold,
-                trait=trait
-            )
-            products.append(product.to_dict())
+                trait = soup.select_one("div[aria-label='price label']")
+                if trait:
+                    trait = trait.text
+
+                product = TokopediaProductModel(
+                    url=url,
+                    image_url=image_url,
+                    name=pname,
+                    place=place,
+                    seller=seller,
+                    current_price=current_price,
+                    previous_price=previous_price,
+                    rating=rating,
+                    sold=sold,
+                    trait=trait
+                )
+                products.append(product.to_dict())
+
+            next_page_button = self.driver.find_element(By.XPATH, "//button[@aria-label='Laman berikutnya']")
+            next_page_button.click()
+            current_page += 1
+            time.sleep(1)
 
         return products
