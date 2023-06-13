@@ -63,8 +63,9 @@ class TokopediaScrapper(Scrapper):
         products = []
 
         while current_page < pages:
-            # Fetch product data
-            block_elements = self.driver.find_elements(By.XPATH, "//div[@class='css-llwpbs']")
+            block_elements = self.wait.until(
+                EC.visibility_of_all_elements_located((By.XPATH, "//div[@class='css-llwpbs']"))
+            )
 
             for block in block_elements:
                 inner_html = block.get_attribute("innerHTML")
